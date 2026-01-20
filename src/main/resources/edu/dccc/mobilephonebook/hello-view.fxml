@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" spacing="0.0" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.dccc.mobilephonebook.ContactsAppController"
+      styleClass="main-container" style="-fx-background-color: #F1F5F9;">
+
+    <VBox spacing="12.0" style="-fx-background-color: linear-gradient(to bottom, #D9EAFD, #F1F5F9); -fx-padding: 20; -fx-border-color: #CBD5E0; -fx-border-width: 0 0 1 0;">
+        <Label text="Contacts"
+               style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1E293B;"
+               alignment="CENTER_LEFT" maxWidth="Infinity"/>
+
+        <VBox spacing="10">
+            <HBox alignment="CENTER_LEFT" spacing="0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #94A3B8; -fx-border-radius: 8; -fx-padding: 2; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                <Label text=" 🔍 " style="-fx-font-size: 14px; -fx-text-fill: #64748B;"/>
+                <TextField fx:id="searchField" promptText="Search name or phone..."
+                           onKeyReleased="#onSearchKeyReleased" HBox.hgrow="ALWAYS"
+                           style="-fx-background-color: transparent; -fx-font-size: 14px; -fx-min-height: 32;"/>
+                <Button text="×" onAction="#onClearSearch"
+                        style="-fx-background-color: transparent; -fx-text-fill: #64748B; -fx-font-size: 18px; -fx-cursor: hand;"/>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <HBox alignment="CENTER" spacing="8">
+                    <Label text="Head" style="-fx-font-size: 11px; -fx-text-fill: #2563EB; -fx-font-weight: bold;"/>
+                    <ToggleButton fx:id="directionToggle" styleClass="slider-switch" onAction="#onSearchKeyReleased"/>
+                    <Label text="Tail" style="-fx-text-fill: #16A34A; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                </HBox>
+                <CheckBox fx:id="singleSearchCheck" text="Single Search Mode"
+                          onAction="#onSingleSearchToggled"
+                          style="-fx-text-fill: #2563EB; -fx-font-weight: bold; -fx-font-size: 11px;"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <ListView fx:id="contactListView" VBox.vgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-background-insets: 0;"/>
+
+    <VBox spacing="12.0" style="-fx-background-color: #F1F5F9; -fx-padding: 20; -fx-border-color: #CBD5E0; -fx-border-width: 1 0 0 0;">
+
+        <VBox spacing="10.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-border-color: #CBD5E0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+            <Label text="Add New Contact" styleClass="section-header" maxWidth="Infinity" alignment="CENTER"
+                   style="-fx-font-size: 13px; -fx-text-fill: #1E293B; -fx-font-weight: bold;"/>
+
+            <GridPane hgap="12" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="65" halignment="RIGHT" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+
+                <Label text="NAME" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #64748B; -fx-letter-spacing: 0.5px;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="nameField" promptText="Full Name"
+                           style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E0; -fx-border-radius: 6;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="PHONE" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #64748B; -fx-letter-spacing: 0.5px;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="phoneField" promptText="Enter phone number"
+                           style="-fx-background-color: #F8FAFC; -fx-border-color: #CBD5E0; -fx-border-radius: 6;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            </GridPane>
+
+            <Button fx:id="addButton"
+                    text="+ Add Contact"
+                    onAction="#onAddButtonClick"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: #2563EB; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-background-radius: 8; -fx-cursor: hand;"/>
+        </VBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label fx:id="statusLabel" text="Found: 0 | Iterations: 0"
+                   style="-fx-font-family: 'Monospaced'; -fx-font-size: 12px; -fx-text-fill: #1E293B; -fx-font-weight: bold;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Delete Selected" onAction="#onDeleteButtonClick"
+                    style="-fx-background-color: transparent; -fx-text-fill: #DC2626; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand;"/>
+            <Button text="Exit" onAction="#onExitButtonClick"
+                    style="-fx-background-color: #E2E8F0; -fx-text-fill: #1E293B; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 6 15; -fx-background-radius: 6; -fx-cursor: hand;"/>
+        </HBox>
+    </VBox>
+
+</VBox>

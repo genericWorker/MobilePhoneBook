@@ -1,0 +1,172 @@
+/* 1. GENERAL ROOT & BACKGROUND */
+.root {
+    -fx-background-color: #F0F4F8;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* 2. THE MAIN CARD */
+.main-container {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-border-color: #4A90E2 transparent transparent transparent;
+    -fx-border-width: 5 0 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 15, 0, 0, 8);
+    /* -fx-padding is usually handled in FXML via <Insets>, but kept here for safety */
+}
+
+/* 3. THE SLIDING PILL SWITCH (Head/Tail) */
+.slider-switch {
+    -fx-min-width: 46;
+    -fx-max-width: 46;
+    -fx-min-height: 22;
+    -fx-max-height: 22;
+    -fx-background-color: #4A90E2, white;
+    -fx-background-radius: 20, 100;
+    -fx-background-insets: 0, 3 26 3 3; /* Pill Left */
+    -fx-cursor: hand;
+}
+
+.slider-switch:selected {
+    -fx-background-color: #27AE60, white;
+    -fx-background-insets: 0, 3 3 3 26; /* Pill Right */
+}
+
+/* 4. LISTVIEW & CARDS (The "Half-Cell" Fix) */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.list-cell {
+    -fx-pref-height: 60px;
+    -fx-min-height: 60px;
+    -fx-max-height: 60px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 15 0 15;
+    -fx-border-color: transparent transparent #f1f1f1 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.list-cell:filled:hover { -fx-background-color: #F7FAFD; }
+.list-cell:filled:selected {
+    -fx-background-color: #4A90E2;
+    -fx-text-fill: white;
+}
+
+/* 5. TEXT FIELDS (Search & Add) */
+.text-field {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #CBD5E0;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 8;
+    -fx-font-size: 13px;
+}
+
+.text-field:focused {
+    -fx-border-color: #4A90E2;
+    -fx-background-color: white;
+}
+
+/* 6. BUTTONS & CLEAR BUTTON */
+.button {
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.add-button {
+    -fx-background-color: #4A90E2;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10 20;
+}
+
+.clear-button {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: black;
+    -fx-background-radius: 0 5 5 0;
+    -fx-font-size: 12px;
+}
+
+.clear-button:hover {
+    -fx-background-color: #F87171;
+    -fx-text-fill: white;
+}
+
+/* 7. CHECKBOX (Matched to Head Label) */
+.check-box {
+    -fx-text-fill: #4A90E2;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.check-box .box {
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #4A90E2;
+}
+
+/* 8. STATUS & SECTIONS */
+.status-label {
+    -fx-font-family: 'Monospaced';
+    -fx-font-size: 11px;
+    -fx-text-fill: #2C3E50;
+}
+
+.section-header {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
+    -fx-alignment: CENTER;
+    -fx-padding: 0 0 5 0;
+}
+
+/* 9. SEPARATORS (Defined lines) */
+.custom-separator .line {
+    -fx-border-color: #A0AEC0;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.custom-separator {
+    -fx-opacity: 0.6;
+    -fx-min-height: 2px;
+}
+
+/* 1. VIBRANT HEADER */
+.main-container {
+    -fx-background-color: #F0F4F8; /* Light blue-gray app background */
+    -fx-padding: 0; /* We will use internal containers for padding */
+}
+
+/* 2. COLOR-BLOCKED TOP SECTION */
+.top-toolbar {
+    -fx-background-color: linear-gradient(to bottom right, #4A90E2, #357ABD);
+    -fx-padding: 20;
+}
+
+.top-toolbar .label {
+    -fx-text-fill: white; /* Make Phonebook title white */
+}
+
+/* 3. VIBRANT SEARCH AREA */
+.search-container {
+    -fx-background-color: rgba(255, 255, 255, 0.15); /* Glass effect */
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+/* 4. RE-COLORING THE BUTTONS */
+.add-button {
+    -fx-background-color: #27AE60; /* Success Green */
+    -fx-text-fill: white;
+}
+
+.delete-button {
+    -fx-background-color: #E74C3C; /* Danger Red */
+    -fx-text-fill: white;
+}
