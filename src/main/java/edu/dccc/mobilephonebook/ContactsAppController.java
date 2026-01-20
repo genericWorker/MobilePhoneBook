@@ -22,13 +22,14 @@ public class ContactsAppController {
 
     private final DoublyLinkedList<ContactsApp.Contact> storage = new DoublyLinkedList<>();
     private final ObservableList<ContactsApp.Contact> displayList = FXCollections.observableArrayList();
-
     private final String FILE_NAME = "contacts.csv";
+    private CSVReaderWriter csvReaderWriter = new CSVReaderWriter(FILE_NAME, storage);
+
 
     @FXML
     public void initialize() {
         contactListView.setItems(displayList);
-        loadFromCSV(true);
+        csvReaderWriter.loadFromCSV(true);
 
         // Listeners for Search
         directionToggle.selectedProperty().addListener((obs, old, isNowSelected) -> performSearch(searchField.getText()));
@@ -154,7 +155,7 @@ public class ContactsAppController {
 
     @FXML
     protected void onExitButtonClick() {
-        saveToCSV();
+        csvReaderWriter.saveToCSV();
         Platform.exit();
     }
 
@@ -163,27 +164,5 @@ public class ContactsAppController {
         performSearch(searchField.getText());
     }
 
-    private void loadFromCSV(boolean hasHeader) {
-        File file = new File(FILE_NAME);
-        if (!file.exists()) return;
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            if (hasHeader) br.readLine();
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 2) {
-                    storage.add(new ContactsApp.Contact(parts[0].trim(), parts[1].trim()));
-                }
-            }
-        } catch (IOException e) { e.printStackTrace(); }
-    }
 
-    private void saveToCSV() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_NAME))) {
-            pw.println("Name,Phone");
-            for (ContactsApp.Contact c : storage) {
-                pw.println(c.getName() + "," + c.getPhone());
-            }
-        } catch (IOException e) { e.printStackTrace(); }
-    }
 }
