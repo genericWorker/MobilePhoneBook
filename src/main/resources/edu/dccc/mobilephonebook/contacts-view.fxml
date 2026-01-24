@@ -39,6 +39,15 @@
     <ListView fx:id="contactListView" VBox.vgrow="ALWAYS"
               style="-fx-background-color: white; -fx-background-insets: 0;"/>
 
+    <HBox alignment="CENTER_LEFT" spacing="10"
+          style="-fx-background-color: #E2E8F0; -fx-padding: 6 15; -fx-border-color: #CBD5E0; -fx-border-width: 1 0 1 0;">
+        <Label fx:id="resultsLabel" text="Found: 0 | Iterations: 0"
+               style="-fx-font-family: 'Monospaced'; -fx-font-size: 11px; -fx-text-fill: #334155; -fx-font-weight: bold;" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="SEARCH METRICS"
+               style="-fx-font-size: 9px; -fx-text-fill: #64748B; -fx-font-weight: bold; -fx-letter-spacing: 1px;"/>
+    </HBox>
+
     <VBox spacing="12.0" style="-fx-background-color: #F1F5F9; -fx-padding: 20; -fx-border-color: #CBD5E0; -fx-border-width: 1 0 0 0;">
 
         <VBox spacing="10.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-border-color: #CBD5E0; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
@@ -67,14 +76,15 @@
                     style="-fx-background-color: #2563EB; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 10; -fx-background-radius: 8; -fx-cursor: hand;"/>
         </VBox>
 
-        <HBox alignment="CENTER_LEFT" spacing="10">
-            <Label fx:id="statusLabel" text="Found: 0 | Iterations: 0"
-                   style="-fx-font-family: 'Monospaced'; -fx-font-size: 12px; -fx-text-fill: #1E293B; -fx-font-weight: bold;" />
+        <HBox alignment="CENTER_LEFT" spacing="10"
+              style="-fx-background-color: #1E293B; -fx-padding: 5 15;">
+            <Label fx:id="statusLabel" text="System Ready"
+                   style="-fx-font-size: 11px; -fx-text-fill: #F8FAFC;" />
             <Region HBox.hgrow="ALWAYS" />
             <Button text="Delete Selected" onAction="#onDeleteButtonClick"
-                    style="-fx-background-color: transparent; -fx-text-fill: #DC2626; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand;"/>
+                    style="-fx-background-color: transparent; -fx-text-fill: #FDA4AF; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand;"/>
             <Button text="Exit" onAction="#onExitButtonClick"
-                    style="-fx-background-color: #E2E8F0; -fx-text-fill: #1E293B; -fx-font-weight: bold; -fx-font-size: 11px; -fx-padding: 6 15; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                    style="-fx-background-color: #334155; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10px; -fx-padding: 3 10; -fx-background-radius: 4;"/>
         </HBox>
     </VBox>
 

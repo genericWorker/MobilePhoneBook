@@ -2,11 +2,11 @@ package edu.dccc.mobilephonebook;
 
 import java.io.*;
 
-public class CSVReaderWriter {
+public class CSVReaderWriterOld {
 
-    private DoublyLinkedList<ContactsApp.Contact> storage;
+    private DoublyLinkedList<Contact> storage;
     private String filePath;
-    public CSVReaderWriter(String filePath,   DoublyLinkedList<ContactsApp.Contact> storage) {
+    public CSVReaderWriterOld(String filePath, DoublyLinkedList<Contact> storage) {
         this.filePath = filePath;
         this.storage = storage;
     }
@@ -21,7 +21,7 @@ public class CSVReaderWriter {
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length >= 2) {
-                    storage.add(new ContactsApp.Contact(parts[0].trim(), parts[1].trim()));
+                    storage.add(new Contact(parts[0].trim(), parts[1].trim()));
                 }
             }
         } catch (IOException e) { e.printStackTrace(); }
@@ -30,7 +30,7 @@ public class CSVReaderWriter {
     public void saveToCSV() {
         try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
             pw.println("Name,Phone");
-            for (ContactsApp.Contact c : storage) {
+            for (Contact c : storage) {
                 pw.println(c.getName() + "," + c.getPhone());
             }
         } catch (IOException e) { e.printStackTrace(); }

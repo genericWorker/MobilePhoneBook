@@ -1,9 +1,10 @@
 package edu.dccc.mobilephonebook;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class DoublyLinkedList<E> implements Iterable<E> {
+public class DoublyLinkedList<E> implements Iterable<E>{
     private Node<E> head;
     private Node<E> tail;
     private int size = 0;
@@ -46,6 +47,12 @@ public class DoublyLinkedList<E> implements Iterable<E> {
             current = current.next;
         }
         return false;
+    }
+
+    public void clear() {
+        head = null;
+        tail = null;
+        size = 0;
     }
 
     // FORWARD ITERATOR (Default)

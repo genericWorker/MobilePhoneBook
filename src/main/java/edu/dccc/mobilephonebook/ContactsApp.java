@@ -15,8 +15,8 @@ public class ContactsApp extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ContactsApp.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 450, 700);
+        FXMLLoader fxmlLoader = new FXMLLoader(ContactsApp.class.getResource("contacts-view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 480, 700);
 
         // Connect CSS
         String css = this.getClass().getResource("style.css").toExternalForm();
@@ -71,28 +71,4 @@ public class ContactsApp extends Application {
         launch();
     }
 
-    // Static Inner Model Class
-    public static class Contact implements Comparable<Contact>{
-        private String name;
-        private String phone;
-
-        public Contact(String name, String phone) {
-            this.name = name;
-            this.phone = phone;
-        }
-
-        public String getName() { return name; }
-        public String getPhone() { return phone; }
-
-        @Override
-        public String toString() {
-            return name + " - " + phone;
-        }
-
-        @Override
-        public int compareTo(Contact other) {
-            // This provides the alphabetical sorting for the TreeSet
-            return this.name.compareToIgnoreCase(other.getName());
-        }
-    }
 }
