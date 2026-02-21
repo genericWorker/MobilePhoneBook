@@ -170,3 +170,21 @@
     -fx-background-color: #E74C3C; /* Danger Red */
     -fx-text-fill: white;
 }
+
+/* Base style for all cells */
+.list-cell {
+    -fx-background-color: white;
+    -fx-text-fill: #1E293B;
+    -fx-padding: 8 15;
+}
+
+/* Style for alternating "odd" rows */
+.list-cell:odd {
+    -fx-background-color: #F1F5F9; /* A very light blue-gray for contrast */
+}
+
+/* Style when a row is selected */
+.list-cell:selected {
+    -fx-background-color: #DBEAFE; /* Light blue highlight */
+    -fx-text-fill: #1E40AF;
+}

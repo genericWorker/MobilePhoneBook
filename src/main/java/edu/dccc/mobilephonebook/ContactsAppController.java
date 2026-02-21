@@ -4,12 +4,14 @@ import edu.dccc.utils.CSVReaderWriter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.TreeSet;
 
 public class ContactsAppController {
 
@@ -26,7 +28,6 @@ public class ContactsAppController {
     private final DoublyLinkedList<Contact> storage = new DoublyLinkedList<Contact>();
     private final ObservableList<Contact> displayList = FXCollections.observableArrayList();
     private final String FILE_NAME = "contacts.csv";
-   //  private CSVReaderWriterOld csvReaderWriter = new CSVReaderWriterOld(FILE_NAME, storage);
     // Use the Generic version: CSVReaderWriter<Type>
     CSVReaderWriter csvReaderWriter;
 
@@ -37,6 +38,9 @@ public class ContactsAppController {
     public void initialize() {
         csvReaderWriter = new CSVReaderWriter<>(FILE_NAME, bridgeList, Contact.class);
         contactListView.setItems(displayList);
+      //  contactListView.setStyle("-fx-control-inner-background: white;");
+        //This targets the cells to reduce their vertical padding
+        //contactListView.setFixedCellSize(40); // Forces every row to be exactly 30 pixels tall
 
         // 1. Load from file into bridgeList
         csvReaderWriter.loadFromCSV(false);
@@ -128,53 +132,6 @@ public class ContactsAppController {
         });
     }
 
-
-
-    private void performSearch(String query) {
-        Contact currentlySelected = contactListView.getSelectionModel().getSelectedItem();
-        displayList.clear();
-        ArrayList<Contact> results = new ArrayList<>();
-        int iterations = 0;
-
-        String lowerQuery = (query == null) ? "" : query.toLowerCase().trim();
-        String searchDigits = lowerQuery.replaceAll("[^0-9]", "");
-
-        Iterable<Contact> path = directionToggle.isSelected() ? storage.backwards() : storage;
-
-        for (Contact c : path) {
-            iterations++;
-
-            // Clean the stored contact phone for comparison
-            String contactDigits = c.getPhone().replaceAll("[^0-9]", "");
-
-            boolean nameMatch = c.getName().toLowerCase().contains(lowerQuery);
-
-            // Match phone if the query contains digits AND those digits are in the contact
-            boolean phoneMatch = !searchDigits.isEmpty() && contactDigits.contains(searchDigits);
-
-            // If it matches either, add it to the list
-            if (lowerQuery.isEmpty() || nameMatch || phoneMatch) {
-                results.add(c);
-                if (singleSearchCheck.isSelected() && !lowerQuery.isEmpty()) break;
-            }
-        }
-
-        resultsLabel.setText(String.format("Found: %d | Iterations: %d", results.size(), iterations));
-
-        // Sorting
-        Comparator<Contact> comp = Comparator.comparing(Contact::getName, String.CASE_INSENSITIVE_ORDER);
-        if (directionToggle.isSelected()) results.sort(comp.reversed());
-        else results.sort(comp);
-
-        displayList.setAll(results);
-
-        if (currentlySelected != null && displayList.contains(currentlySelected)) {
-            contactListView.getSelectionModel().select(currentlySelected);
-        }
-
-
-    }
-
     @FXML
     private void onClearSearch() {
         searchField.clear();
@@ -211,6 +168,52 @@ public class ContactsAppController {
         statusLabel.setStyle("-fx-text-fill: #60A5FA;"); // Light blue success color
     }
 
+    private void performSearch(String query) {
+        Contact currentlySelected = contactListView.getSelectionModel().getSelectedItem();
+        displayList.clear();
+        int iterations = 0;
+
+        String lowerQuery = (query == null) ? "" : query.toLowerCase().trim();
+        String searchDigits = lowerQuery.replaceAll("[^0-9]", "");
+
+        // FIX: Keep the UI sorting constant (A-Z) so the user
+        // doesn't get confused when you flip the search direction.
+        Comparator<Contact> comp = Comparator
+                .comparing(Contact::getName, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(Contact::getPhone);
+
+        // Only use results.sort(comp.reversed()) if you want a "Z-A" UI feature.
+        // For now, let's keep it natural.
+        TreeSet<Contact> results = new TreeSet<>(comp);
+
+        // This is the part that changes the iterations (The Data Structure lesson)
+        //  TreeSet refreshed from storage, path means forward or backwards
+        Iterable<Contact> path = directionToggle.isSelected() ? storage.backwards() : storage;
+
+        for (Contact c : path) {
+            iterations++;
+
+            String contactDigits = c.getPhone().replaceAll("[^0-9]", "");
+            boolean nameMatch = c.getName().toLowerCase().contains(lowerQuery);
+            boolean phoneMatch = !searchDigits.isEmpty() && contactDigits.contains(searchDigits);
+
+            if (lowerQuery.isEmpty() || nameMatch || phoneMatch) {
+                results.add(c);
+
+                if (singleSearchCheck.isSelected() && !lowerQuery.isEmpty()) {
+                    break;
+                }
+            }
+        }
+
+        resultsLabel.setText(String.format("Found: %d | Iterations: %d", results.size(), iterations));
+        displayList.setAll(results);
+
+        if (currentlySelected != null && displayList.contains(currentlySelected)) {
+            contactListView.getSelectionModel().select(currentlySelected);
+        }
+    }
+
     @FXML
     private void onSearchKeyReleased() {
         performSearch(searchField.getText());
@@ -237,15 +240,35 @@ public class ContactsAppController {
     }
 
     @FXML
-    protected void onExitButtonClick() {
-        csvReaderWriter.saveToCSVSorted(null);
-        Platform.exit();
+    private void onExitButtonClick(ActionEvent event) {
+        try {
+            // 1. Update the status UI (nice for user feedback)
+            statusLabel.setText("Saving contacts...");
+
+            // 2. Delegate to your utility class.
+            // This handles the header, the copy-to-list, and the sorting.
+            csvReaderWriter.saveToCSVSorted("Name,Phone");
+
+            // 3. Log to console for debugging
+            System.out.println("Clean exit: Contacts saved alphabetically.");
+
+            // 4. Close the JavaFX Application
+            Platform.exit();
+
+        } catch (Exception e) {
+            // Just in case something goes wrong with the file system
+            statusLabel.setText("Error during save!");
+            e.printStackTrace();
+        }
+    }
+
+    // Add an overloaded version for the Main App to call easily
+    public void onExitButtonClick() {
+        onExitButtonClick(null);
     }
 
     @FXML
     private void onSingleSearchToggled() {
         performSearch(searchField.getText());
     }
-
-
 }
