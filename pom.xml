@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>phone.dccc.edu</groupId>
-  <artifactId>MobilePhoneBook</artifactId>
+  <artifactId>ContactsApp</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>MobilePhoneBook</name>
 
