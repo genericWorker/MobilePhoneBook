@@ -1,6 +1,6 @@
 package edu.dccc.mobilephonebook;
 
-import edu.dccc.utils.CSVReaderWriter;
+import edu.dccc.store.CSVReaderWriter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.TreeSet;
 
 public class ContactsAppController {
@@ -29,15 +28,13 @@ public class ContactsAppController {
     private final ObservableList<Contact> displayList = FXCollections.observableArrayList();
     private final String FILE_NAME = "contacts2.csv";
     // Use the Generic version: CSVReaderWriter<Type>
-    CSVReaderWriter csvReaderWriter;
-
-
-
+    private CSVReaderWriter csvReaderWriter;
 
     @FXML
     public void initialize() {
 
         // 2. Initialize the Persistence Engine (The Utility)
+        //  bridgeList is an ArrayList used for temporary sorting of contacts to/from storage
         csvReaderWriter = new CSVReaderWriter<>(FILE_NAME, bridgeList, Contact.class);
 
         // 3. Connect the ObservableList to the UI
@@ -45,7 +42,7 @@ public class ContactsAppController {
 
         // 4. LOAD DATA: CSV -> ArrayList (bridgeList)
         // 'false' means we don't want to append; we want a fresh load.
-        csvReaderWriter.loadFromCSV(false);
+        csvReaderWriter.loadFromCSV(true);
 
         // 5. SYNC: ArrayList (bridgeList) -> DoublyLinkedList (storage)
         storage.clear();
@@ -74,9 +71,42 @@ public class ContactsAppController {
             }
         });
 
+        // Also clear it when they click the list
+        contactListView.getSelectionModel().selectedItemProperty().addListener((obs, old, val) -> {
+            if (val != null) clearStatus();
+        });
+
         // 7. FINAL STATE: Set initial UI appearance
         validateInput();
-        updateUI(); // This populates the displayList for the first time
+        updateUI(); // This populates the UI displayList for the first time
+        // Clear the status label when the user starts typing in any field
+        resetStatus(); // Sets the initial "Ready" message
+        nameField.setOnKeyTyped(e -> clearStatus());
+        phoneField.setOnKeyTyped(e -> clearStatus());
+        searchField.setOnKeyTyped(e -> clearStatus());
+    }
+
+    // Helper method to reset the label
+    private void clearStatus() {
+        statusLabel.setText("");
+        statusLabel.setStyle("");
+    }
+
+    private void resetStatus() {
+        // Show a helpful default, like the total count in your DoublyLinkedList
+        int count = storage.getSize(); // Assuming your storage has a getSize() method
+        statusLabel.setText("System Ready | Total Contacts: " + count);
+        statusLabel.setStyle("-fx-text-fill: #94A3B8; -fx-font-weight: normal;");
+    }
+
+    private void showTimedStatus(String message, String color) {
+        statusLabel.setText(message);
+        statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+
+        // After 3 seconds, fade back to the default status
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+        pause.setOnFinished(e -> resetStatus());
+        pause.play();
     }
 
     private void validateInput() {
@@ -110,12 +140,10 @@ public class ContactsAppController {
     }
 
     private void handleEditPopup(Contact contact) {
-        // Create a custom dialog
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Edit Contact");
         dialog.setHeaderText("Updating: " + contact.getName());
 
-        // Set up the input fields
         TextField nameEdit = new TextField(contact.getName());
         TextField phoneEdit = new TextField(contact.getPhone());
 
@@ -123,18 +151,35 @@ public class ContactsAppController {
         content.setPadding(new javafx.geometry.Insets(20));
         dialog.getDialogPane().setContent(content);
 
-        // Add Save and Cancel buttons
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // Process the result
+        // 1. Get a reference to the OK button
+        javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
+
+        // 2. Validation Logic
+        Runnable validate = () -> {
+            boolean nameBlank = nameEdit.getText().trim().isEmpty();
+            boolean phoneBlank = phoneEdit.getText().trim().isEmpty();
+            // You can also add length requirements here
+            okButton.setDisable(nameBlank || phoneBlank);
+        };
+
+        // 3. Attach listeners so the button toggles as the user types
+        nameEdit.textProperty().addListener((obs, old, val) -> validate.run());
+        phoneEdit.textProperty().addListener((obs, old, val) -> validate.run());
+
+        // Run once immediately to check current state
+        validate.run();
+
         dialog.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                contact.setName(nameEdit.getText());
-                contact.setPhone(phoneEdit.getText());
+                contact.setName(nameEdit.getText().trim());
+                contact.setPhone(phoneEdit.getText().trim());
+                contact.setLastModified(java.time.LocalDateTime.now()); // Update timestamp
 
-                updateUI(); // Refresh list and resultsLabel
-                statusLabel.setText("✔ Updated: " + contact.getName());
-                statusLabel.setStyle("-fx-text-fill: #60A5FA;");
+                updateUI();
+                showTimedStatus("✔ Updated: " + contact.getName(), "#60A5FA");
+           //   statusLabel.setStyle("-fx-text-fill: #60A5FA;");
             }
         });
     }
@@ -168,20 +213,37 @@ public class ContactsAppController {
         nameField.clear();
         phoneField.clear();
 
+        //  Adds new contact to list
         updateUI();
         validateInput(); // Correctly disables button after clear
 
         // Success Flash
-        statusLabel.setText("Successfully added: " + name);
-        statusLabel.setStyle("-fx-text-fill: #60A5FA;"); // Light blue success color
+        showTimedStatus("Successfully added: " + name, "#60A5FA");
     }
 
     private void performSearch(String query) {
+
+        // 1. CRITICAL: Clear the selection before doing anything else
+        // This prevents "Ghost Selection" from previous results
+        contactListView.getSelectionModel().clearSelection();
+
+        // 2. Handle Empty Query WITHOUT calling updateUI()
+        if (query == null || query.isEmpty()) {
+            displayList.clear();
+            // Just dump the storage into the display list
+            for (Contact c : storage) {
+                displayList.add(c);
+            }
+            resultsLabel.setText("Showing All | Total: " + storage.getSize());
+            resetStatus();
+            return; // EXIT HERE to stop the loop
+        }
+
         Contact currentlySelected = contactListView.getSelectionModel().getSelectedItem();
         displayList.clear();
         int iterations = 0;
 
-        // 1. Capture the ID or specific reference, not just the "content"
+        // 2. Capture the ID or specific reference, not just the "content"
         String lowerQuery = (query == null) ? "" : query.toLowerCase().trim();
         String searchDigits = lowerQuery.replaceAll("[^0-9]", "");
 
@@ -225,6 +287,14 @@ public class ContactsAppController {
     @FXML
     protected void onDeleteButtonClick() {
         Contact selected = contactListView.getSelectionModel().getSelectedItem();
+
+        // 2. GUARD CLAUSE: Stop immediately if null
+        if (selected == null) {
+            showTimedStatus("⚠ Please select a contact to delete first.", "#FBBF24");
+            return; // This ensures NO code below this line runs
+        }
+
+
         if (selected != null) {
             String deletedName = selected.getName();
             storage.remove(selected);
@@ -232,13 +302,11 @@ public class ContactsAppController {
             updateUI();
 
             // Update the System Status Bar
-            statusLabel.setText("🗑 Deleted: " + deletedName);
-            statusLabel.setStyle("-fx-text-fill: #F87171; -fx-font-weight: bold;"); // Soft red for dark BG
+            showTimedStatus("🗑 Deleted: " + deletedName, "#F87171");
         }
         else {
             // Warning if nothing is selected
-            statusLabel.setText("⚠ Please select a contact to delete first.");
-            statusLabel.setStyle("-fx-text-fill: #FBBF24;"); // Amber for warning
+            showTimedStatus("⚠ Please select a contact to delete first.", "#FBBF24");
         }
     }
 

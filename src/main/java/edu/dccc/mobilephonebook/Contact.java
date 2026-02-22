@@ -1,6 +1,6 @@
 package edu.dccc.mobilephonebook;
 
-import edu.dccc.utils.CSVTemplate;
+import edu.dccc.store.CSVTemplate;
 
 import java.time.LocalDateTime;
 
@@ -8,11 +8,15 @@ import java.time.LocalDateTime;
 public class Contact implements Comparable<Contact>, CSVTemplate {
     private String name;
     private String phone;
+
+    public void setLastModified(LocalDateTime lastModified) {
+        this.lastModified = lastModified;
+    }
+
     private LocalDateTime lastModified;
 
-
+    // Empty constructor required for CSVReaderWriter Constructor
    public Contact() {
-
    }
 
     public Contact(String name, String phone) {
@@ -38,7 +42,6 @@ public class Contact implements Comparable<Contact>, CSVTemplate {
     @Override
     public String toString() {
          return name + "  -  " + phone;
-//       return String.format("%-20s |  %15s", name, phone);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package edu.dccc.mobilephonebook;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -9,12 +8,18 @@ public class DoublyLinkedList<E> implements Iterable<E>{
     private Node<E> tail;
     private int size = 0;
 
+
+
     private static class Node<E> {
         E data;
         Node<E> next;
         Node<E> prev;
 
         Node(E data) { this.data = data; }
+    }
+
+    public int getSize() {
+        return size;
     }
 
     // Standard Add (to the tail)
@@ -29,6 +34,7 @@ public class DoublyLinkedList<E> implements Iterable<E>{
         }
         size++;
     }
+
 
     // NEW: Remove method for your Delete button
     public boolean remove(E element) {

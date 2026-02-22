@@ -1,4 +1,4 @@
-package edu.dccc.utils;
+package edu.dccc.store;
 
 public interface CSVTemplate {
     String toCSV();               // Logic for saving
