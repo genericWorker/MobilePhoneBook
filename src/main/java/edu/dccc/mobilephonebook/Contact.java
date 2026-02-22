@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 public class Contact implements Comparable<Contact>, CSVTemplate {
     private String name;
     private String phone;
-    LocalDateTime lastModified;
+    private LocalDateTime lastModified;
+
 
    public Contact() {
 
@@ -17,6 +18,7 @@ public class Contact implements Comparable<Contact>, CSVTemplate {
     public Contact(String name, String phone) {
         this.name = name;
         this.phone = phone;
+        this.lastModified = LocalDateTime.now(); // Initialize here!
     }
 
     public void setName(String name) {
@@ -29,10 +31,14 @@ public class Contact implements Comparable<Contact>, CSVTemplate {
 
     public String getName() { return name; }
     public String getPhone() { return phone; }
+    public LocalDateTime getLastModified() {
+        return lastModified;
+    }
 
     @Override
     public String toString() {
-        return name + " - " + phone;
+         return name + "  -  " + phone;
+//       return String.format("%-20s |  %15s", name, phone);
     }
 
     @Override
@@ -49,7 +55,7 @@ public class Contact implements Comparable<Contact>, CSVTemplate {
             return phoneCompare;
         }
 
-        // 3. Tie-breaker 2: Timestamp (The "Birth Certificate")
+        // 3. Timestamp (The "Birth Certificate")
         // If name and phone are identical, the one created earlier comes first.
         return this.lastModified.compareTo(other.lastModified);
     }

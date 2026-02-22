@@ -27,7 +27,7 @@ public class ContactsAppController {
     private final ArrayList<Contact> bridgeList = new ArrayList<>();
     private final DoublyLinkedList<Contact> storage = new DoublyLinkedList<Contact>();
     private final ObservableList<Contact> displayList = FXCollections.observableArrayList();
-    private final String FILE_NAME = "contacts.csv";
+    private final String FILE_NAME = "contacts2.csv";
     // Use the Generic version: CSVReaderWriter<Type>
     CSVReaderWriter csvReaderWriter;
 
@@ -36,40 +36,47 @@ public class ContactsAppController {
 
     @FXML
     public void initialize() {
-        csvReaderWriter = new CSVReaderWriter<>(FILE_NAME, bridgeList, Contact.class);
-        contactListView.setItems(displayList);
-      //  contactListView.setStyle("-fx-control-inner-background: white;");
-        //This targets the cells to reduce their vertical padding
-        //contactListView.setFixedCellSize(40); // Forces every row to be exactly 30 pixels tall
 
-        // 1. Load from file into bridgeList
+        // 2. Initialize the Persistence Engine (The Utility)
+        csvReaderWriter = new CSVReaderWriter<>(FILE_NAME, bridgeList, Contact.class);
+
+        // 3. Connect the ObservableList to the UI
+        contactListView.setItems(displayList);
+
+        // 4. LOAD DATA: CSV -> ArrayList (bridgeList)
+        // 'false' means we don't want to append; we want a fresh load.
         csvReaderWriter.loadFromCSV(false);
 
-        // 2. SYNC: Copy from bridgeList to storage
+        // 5. SYNC: ArrayList (bridgeList) -> DoublyLinkedList (storage)
         storage.clear();
-        //  Following writes the contacts from the bridgeList to storage
         for (Contact c : bridgeList) {
-            storage.add(c);
+            if (!storage.contains(c)) { // 1. Prevents the "Hang" (Memory Safety)
+                storage.add(c);        // 2. Adds the contact
+            }
         }
 
-        // Listeners for Search
+        // 6. UI EVENT LISTENERS
+        // Trigger a search/refresh whenever the toggle or search text changes
         directionToggle.selectedProperty().addListener((obs, old, isNowSelected) -> performSearch(searchField.getText()));
         searchField.textProperty().addListener((obs, oldVal, newVal) -> performSearch(newVal));
 
-        // Listeners for Add Contact Validation
+        // Listeners for Add Contact Validation (Enables/Disables the Add button)
         nameField.textProperty().addListener((obs, old, newVal) -> validateInput());
         phoneField.textProperty().addListener((obs, old, newVal) -> validateInput());
+
+        // Double-click to Edit listener
         contactListView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) { // Detection of double-click
+            if (event.getClickCount() == 2) {
                 Contact selected = contactListView.getSelectionModel().getSelectedItem();
                 if (selected != null) {
                     handleEditPopup(selected);
                 }
             }
         });
-        // Initial UI State
+
+        // 7. FINAL STATE: Set initial UI appearance
         validateInput();
-        updateUI();
+        updateUI(); // This populates the displayList for the first time
     }
 
     private void validateInput() {
@@ -155,8 +162,9 @@ public class ContactsAppController {
             phone = digits.substring(0, 3) + "-" + digits.substring(3, 6) + "-" + digits.substring(6);
         }
 
-        storage.add(new Contact(name, phone));
-
+        Contact newContact = new Contact(name, phone);
+        storage.add(newContact);
+        bridgeList.add(newContact); // This updates the CSV memory buffer
         nameField.clear();
         phoneField.clear();
 
@@ -173,21 +181,16 @@ public class ContactsAppController {
         displayList.clear();
         int iterations = 0;
 
+        // 1. Capture the ID or specific reference, not just the "content"
         String lowerQuery = (query == null) ? "" : query.toLowerCase().trim();
         String searchDigits = lowerQuery.replaceAll("[^0-9]", "");
 
-        // FIX: Keep the UI sorting constant (A-Z) so the user
-        // doesn't get confused when you flip the search direction.
-        Comparator<Contact> comp = Comparator
-                .comparing(Contact::getName, String.CASE_INSENSITIVE_ORDER)
-                .thenComparing(Contact::getPhone);
-
-        // Only use results.sort(comp.reversed()) if you want a "Z-A" UI feature.
-        // For now, let's keep it natural.
-        TreeSet<Contact> results = new TreeSet<>(comp);
+        // Uses the 'Natural Ordering' defined in your Contact class
+        TreeSet<Contact> results = new TreeSet<>();
 
         // This is the part that changes the iterations (The Data Structure lesson)
         //  TreeSet refreshed from storage, path means forward or backwards
+        //  path is contact list of items from head or tail
         Iterable<Contact> path = directionToggle.isSelected() ? storage.backwards() : storage;
 
         for (Contact c : path) {
@@ -209,7 +212,7 @@ public class ContactsAppController {
         resultsLabel.setText(String.format("Found: %d | Iterations: %d", results.size(), iterations));
         displayList.setAll(results);
 
-        if (currentlySelected != null && displayList.contains(currentlySelected)) {
+        if (currentlySelected != null)  {
             contactListView.getSelectionModel().select(currentlySelected);
         }
     }
