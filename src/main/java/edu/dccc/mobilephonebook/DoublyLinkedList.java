@@ -60,6 +60,7 @@ public class DoublyLinkedList<E> implements Iterable<E>{
         tail = null;
         size = 0;
     }
+
     public boolean contains(E element) {
         Node<E> current = head;
         while (current != null) {

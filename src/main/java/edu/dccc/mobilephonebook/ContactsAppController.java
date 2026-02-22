@@ -26,6 +26,7 @@ public class ContactsAppController {
     private final ArrayList<Contact> bridgeList = new ArrayList<>();
     private final DoublyLinkedList<Contact> storage = new DoublyLinkedList<Contact>();
     private final ObservableList<Contact> displayList = FXCollections.observableArrayList();
+    // TODO:  Set what csv file you want to use. Root of project is default
     private final String FILE_NAME = "contacts2.csv";
     // Use the Generic version: CSVReaderWriter<Type>
     private CSVReaderWriter csvReaderWriter;
@@ -35,6 +36,7 @@ public class ContactsAppController {
 
         // 2. Initialize the Persistence Engine (The Utility)
         //  bridgeList is an ArrayList used for temporary sorting of contacts to/from storage
+        //  bridgeList gets passed int the CSVReaderWriter
         csvReaderWriter = new CSVReaderWriter<>(FILE_NAME, bridgeList, Contact.class);
 
         // 3. Connect the ObservableList to the UI
@@ -45,6 +47,7 @@ public class ContactsAppController {
         csvReaderWriter.loadFromCSV(true);
 
         // 5. SYNC: ArrayList (bridgeList) -> DoublyLinkedList (storage)
+        // Load the storage from th bridgeList.
         storage.clear();
         for (Contact c : bridgeList) {
             if (!storage.contains(c)) { // 1. Prevents the "Hang" (Memory Safety)
@@ -229,12 +232,13 @@ public class ContactsAppController {
 
         // 2. Handle Empty Query WITHOUT calling updateUI()
         if (query == null || query.isEmpty()) {
-            displayList.clear();
-            // Just dump the storage into the display list
+            // Instead of adding directly to displayList, use a TreeSet to sort them
+            TreeSet<Contact> sortedResults = new TreeSet<>();
             for (Contact c : storage) {
-                displayList.add(c);
+                sortedResults.add(c);
             }
-            resultsLabel.setText("Showing All | Total: " + storage.getSize());
+            displayList.setAll(sortedResults); // Populates UI in alphabetical order
+            resultsLabel.setText("Total Contacts: " + storage.getSize());
             resetStatus();
             return; // EXIT HERE to stop the loop
         }
